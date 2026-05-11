@@ -26,6 +26,12 @@ class AuthService:
     def __init__(self, db: Session) -> None:
         self.repo = AuthRepository(db)
 
+    def register(self, email: str, password: str) -> TokenResponse:
+        if self.repo.get_by_email(email):
+            raise ValueError("E-mail já cadastrado")
+        user = self.repo.create(email=email, password_hash=pwd_context.hash(password))
+        return self._issue_tokens(user.id)
+
     def login(self, email: str, password: str) -> TokenResponse:
         user = self.repo.get_by_email(email)
         if not user or not pwd_context.verify(password, user.password_hash):

@@ -2,10 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.modules.auth.schemas import LoginRequest, RefreshRequest, TokenResponse
+from app.modules.auth.schemas import LoginRequest, RefreshRequest, RegisterRequest, TokenResponse
 from app.modules.auth.service import AuthService
 
 router = APIRouter()
+
+
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+def register(body: RegisterRequest, db: Session = Depends(get_db)):
+    try:
+        return AuthService(db).register(body.email, body.password)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.post("/login", response_model=TokenResponse)

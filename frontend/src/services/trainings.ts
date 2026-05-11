@@ -1,5 +1,5 @@
 import api from '../lib/api'
-import type { Training, TrainingDocument } from '../types'
+import type { AskResponse, Training, TrainingDocument } from '../types'
 
 export const trainingsService = {
   list: () => api.get<Training[]>('/trainings').then((r) => r.data),
@@ -13,4 +13,6 @@ export const trainingsService = {
       .post<TrainingDocument>(`/trainings/${trainingId}/documents`, form)
       .then((r) => r.data)
   },
+  ask: (trainingId: string, question: string) =>
+    api.post<AskResponse>(`/trainings/${trainingId}/ask`, { question }).then((r) => r.data),
 }

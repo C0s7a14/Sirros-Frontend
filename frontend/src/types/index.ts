@@ -29,6 +29,17 @@ export interface Quiz {
   title: string
 }
 
+export interface ChunkSource {
+  chunk_id: string
+  chunk_text: string
+  chunk_index: number
+}
+
+export interface AskResponse {
+  answer: string
+  sources: ChunkSource[]
+}
+
 export interface TokenResponse {
   access_token: string
   refresh_token: string
