@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { PrivateRoute } from './components/PrivateRoute'
 import { Layout } from './components/Layout'
 import { LoginPage } from './pages/Login/LoginPage'
+import { MagicLinkPage } from './pages/Login/MagicLinkPage'
 import { HomePage } from './pages/Home/HomePage'
 import { TrainingsPage } from './pages/Trainings/TrainingsPage'
 import { TrainingPage } from './pages/Training/TrainingPage'
@@ -16,6 +17,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/magic" element={<MagicLinkPage />} />
           <Route element={<PrivateRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />

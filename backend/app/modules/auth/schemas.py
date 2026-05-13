@@ -18,3 +18,12 @@ class RefreshRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class MagicLinkRequest(BaseModel):
+    email: EmailStr
+
+
+class MagicLinkRequestResponse(BaseModel):
+    message: str
+    magic_url: str

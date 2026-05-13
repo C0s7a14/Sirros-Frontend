@@ -57,41 +57,47 @@ export function TrainingPage() {
     }
   }
 
-  if (isLoading) return <p className="p-8 text-gray-500">Carregando...</p>
+  if (isLoading) return <p className="p-8 text-[#797979]">Carregando...</p>
   if (!training) return <p className="p-8 text-red-500">Treinamento não encontrado.</p>
 
   return (
     <div className="p-8 max-w-2xl mx-auto space-y-6">
       <button
         onClick={() => navigate('/trainings')}
-        className="text-sm text-indigo-600 hover:underline mb-2 inline-block"
+        className="text-sm text-[#30a8f2] hover:underline mb-2 inline-block font-medium"
       >
         ← Treinamentos
       </button>
-      <h1 className="text-2xl font-semibold text-gray-800">{training.title}</h1>
-      <p className="text-gray-600">{training.description}</p>
 
-      <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center space-y-3">
-        <p className="text-sm text-gray-500">Adicionar PDF ao treinamento</p>
+      <h1
+        className="text-2xl font-bold text-[#091f33]"
+        style={{ fontFamily: 'Raleway, sans-serif' }}
+      >
+        {training.title}
+      </h1>
+      <p className="text-[#797979]">{training.description}</p>
+
+      <div className="border-2 border-dashed border-[#30a8f2]/50 bg-[#30a8f2]/5 rounded-[20px] p-6 text-center space-y-3">
+        <p className="text-sm text-[#797979]">Adicionar PDF ao treinamento</p>
         <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
         <button
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50"
+          className="bg-[#30a8f2] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#1a96e0] disabled:opacity-50 transition-colors duration-200"
         >
           {uploading ? 'Enviando...' : 'Selecionar PDF'}
         </button>
-        {uploadMsg && <p className="text-sm text-gray-600">{uploadMsg}</p>}
+        {uploadMsg && <p className="text-sm text-[#333]">{uploadMsg}</p>}
       </div>
 
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-          <h2 className="text-sm font-medium text-gray-700">Perguntar sobre o conteúdo</h2>
+      <div className="bg-white rounded-[20px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] overflow-hidden">
+        <div className="bg-[#091f33] px-5 py-3">
+          <h2 className="text-sm font-semibold text-white">Perguntar sobre o conteúdo</h2>
         </div>
 
         <div className="p-4 space-y-3 min-h-[120px] max-h-80 overflow-y-auto">
           {messages.length === 0 && (
-            <p className="text-sm text-gray-400 text-center mt-8">
+            <p className="text-sm text-[#797979] text-center mt-8">
               Faça uma pergunta sobre o PDF enviado.
             </p>
           )}
@@ -103,8 +109,8 @@ export function TrainingPage() {
               <div
                 className={`max-w-[80%] px-4 py-2 rounded-lg text-sm ${
                   msg.role === 'user'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-[#30a8f2] text-white'
+                    : 'bg-gray-100 text-[#333]'
                 }`}
               >
                 {msg.content}
@@ -113,26 +119,26 @@ export function TrainingPage() {
           ))}
           {asking && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 text-gray-400 px-4 py-2 rounded-lg text-sm">
+              <div className="bg-gray-100 text-[#797979] px-4 py-2 rounded-lg text-sm">
                 Pensando...
               </div>
             </div>
           )}
         </div>
 
-        <form onSubmit={handleAsk} className="border-t border-gray-200 p-3 flex gap-2">
+        <form onSubmit={handleAsk} className="border-t border-gray-100 p-3 flex gap-2">
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Digite sua pergunta..."
             disabled={asking}
-            className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-50"
+            className="flex-1 text-sm border border-[#30a8f2]/40 rounded-[15px] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#30a8f2] disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={asking || !question.trim()}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50"
+            className="bg-[#30a8f2] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1a96e0] disabled:opacity-50 transition-colors duration-200"
           >
             Enviar
           </button>

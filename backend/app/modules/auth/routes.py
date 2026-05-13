@@ -2,7 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.modules.auth.schemas import LoginRequest, RefreshRequest, RegisterRequest, TokenResponse
+from app.modules.auth.schemas import (
+    LoginRequest,
+    MagicLinkRequest,
+    MagicLinkRequestResponse,
+    RefreshRequest,
+    RegisterRequest,
+    TokenResponse,
+)
 from app.modules.auth.service import AuthService
 
 router = APIRouter()
@@ -35,3 +42,16 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout():
     return None
+
+
+@router.post("/magic/request", response_model=MagicLinkRequestResponse)
+def magic_link_request(body: MagicLinkRequest, db: Session = Depends(get_db)):
+    return AuthService(db).request_magic_link(body.email)
+
+
+@router.get("/magic/verify", response_model=TokenResponse)
+def magic_link_verify(token: str, db: Session = Depends(get_db)):
+    try:
+        return AuthService(db).verify_magic_link(token)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
