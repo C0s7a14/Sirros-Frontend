@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import api from '../../lib/api'
+import type { TokenResponse } from '../../types'
 
 type Tab = 'login' | 'register'
 
@@ -9,10 +10,10 @@ export function LoginPage() {
   const [tab, setTab] = useState<Tab>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [magicEmail, setMagicEmail] = useState('')
-  const [magicLoading, setMagicLoading] = useState(false)
-  const [magicUrl, setMagicUrl] = useState<string | null>(null)
-  const [magicError, setMagicError] = useState<string | null>(null)
+  const [regEmail, setRegEmail] = useState('')
+  const [regPassword, setRegPassword] = useState('')
+  const [regLoading, setRegLoading] = useState(false)
+  const [regError, setRegError] = useState<string | null>(null)
   const { login, loading, error } = useAuth()
   const navigate = useNavigate()
 
@@ -22,18 +23,27 @@ export function LoginPage() {
     if (ok) navigate('/trainings')
   }
 
-  async function handleMagicRequest(e: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setMagicLoading(true)
-    setMagicError(null)
-    setMagicUrl(null)
+    setRegLoading(true)
+    setRegError(null)
     try {
-      const { data } = await api.post('/auth/magic/request', { email: magicEmail })
-      setMagicUrl(data.magic_url)
-    } catch {
-      setMagicError('Erro ao enviar o link. Tente novamente.')
+      const { data } = await api.post<TokenResponse>('/auth/register', {
+        email: regEmail,
+        password: regPassword,
+      })
+      localStorage.setItem('access_token', data.access_token)
+      localStorage.setItem('refresh_token', data.refresh_token)
+      navigate('/trainings')
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 409) {
+        setRegError('E-mail já cadastrado.')
+      } else {
+        setRegError('Erro ao criar conta. Tente novamente.')
+      }
     } finally {
-      setMagicLoading(false)
+      setRegLoading(false)
     }
   }
 
@@ -104,55 +114,37 @@ export function LoginPage() {
         )}
 
         {tab === 'register' && (
-          <div className="space-y-4">
-            {!magicUrl ? (
-              <form onSubmit={handleMagicRequest} className="space-y-4">
-                <p className="text-sm text-[#797979]">
-                  Informe seu e-mail e enviaremos um link de acesso.
-                </p>
-                {magicError && <p className="text-red-500 text-sm">{magicError}</p>}
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-[#333]">E-mail</label>
-                  <input
-                    type="email"
-                    value={magicEmail}
-                    onChange={(e) => setMagicEmail(e.target.value)}
-                    className="w-full border border-[#30a8f2] bg-[#30a8f2]/10 rounded-[15px] px-4 py-2.5 text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#30a8f2]"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={magicLoading}
-                  className="w-full bg-[#30a8f2] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1a96e0] disabled:opacity-50 transition-colors duration-200"
-                >
-                  {magicLoading ? 'Enviando...' : 'Enviar link mágico'}
-                </button>
-              </form>
-            ) : (
-              <div className="space-y-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-[#30a8f2]/10 flex items-center justify-center mx-auto">
-                  <svg className="w-6 h-6 text-[#30a8f2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <p className="text-sm font-medium text-[#333]">Link enviado!</p>
-                <p className="text-xs text-[#797979]">Verifique seu e-mail para acessar.</p>
-                <a
-                  href={magicUrl}
-                  className="block w-full bg-[#30a8f2] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1a96e0] transition-colors duration-200 text-center"
-                >
-                  Abrir link de acesso
-                </a>
-                <button
-                  onClick={() => { setMagicUrl(null); setMagicEmail('') }}
-                  className="text-xs text-[#797979] hover:text-[#333] transition-colors"
-                >
-                  Enviar novamente
-                </button>
-              </div>
-            )}
-          </div>
+          <form onSubmit={handleRegister} className="space-y-4">
+            {regError && <p className="text-red-500 text-sm">{regError}</p>}
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-[#333]">E-mail</label>
+              <input
+                type="email"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+                className="w-full border border-[#30a8f2] bg-[#30a8f2]/10 rounded-[15px] px-4 py-2.5 text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#30a8f2]"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-[#333]">Senha</label>
+              <input
+                type="password"
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+                className="w-full border border-[#30a8f2] bg-[#30a8f2]/10 rounded-[15px] px-4 py-2.5 text-sm text-[#333] focus:outline-none focus:ring-2 focus:ring-[#30a8f2]"
+                required
+                minLength={6}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={regLoading}
+              className="w-full bg-[#30a8f2] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1a96e0] disabled:opacity-50 transition-colors duration-200"
+            >
+              {regLoading ? 'Criando conta...' : 'Criar conta'}
+            </button>
+          </form>
         )}
       </div>
     </div>
