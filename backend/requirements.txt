@@ -11,4 +11,5 @@ python-dotenv
 pytest
 httpx
 pgvector
+ollama
 pydantic[email]

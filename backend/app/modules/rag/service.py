@@ -1,9 +1,14 @@
+import os
+
+import ollama
 from sqlalchemy.orm import Session
 
+from app.embeddings import embed
 from app.modules.rag.repository import RagRepository
 from app.modules.rag.schemas import AskResponse, ChunkSource
 
-OLLAMA_MODEL = "llama3.2"
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 TOP_K = 5
 
 
@@ -24,15 +29,6 @@ class RagService:
         self.repo = RagRepository(db)
 
     def ask(self, training_id: str, question: str) -> AskResponse:
-        try:
-            import ollama
-            from app.embeddings import embed
-        except ImportError:
-            return AskResponse(
-                answer="RAG não disponível neste ambiente.",
-                sources=[],
-            )
-
         query_embedding = embed(question)
         chunks = self.repo.search_similar_chunks(training_id, query_embedding, limit=TOP_K)
 
@@ -43,7 +39,8 @@ class RagService:
             )
 
         prompt = _build_prompt(question, [c.chunk_text for c in chunks])
-        response = ollama.chat(
+        client = ollama.Client(host=OLLAMA_HOST)
+        response = client.chat(
             model=OLLAMA_MODEL,
             messages=[{"role": "user", "content": prompt}],
         )
