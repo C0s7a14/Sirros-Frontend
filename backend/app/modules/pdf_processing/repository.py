@@ -14,8 +14,14 @@ class PdfRepository:
         self.db.refresh(doc)
         return doc
 
+    def get_document(self, document_id: str) -> TrainingDocument | None:
+        return self.db.query(TrainingDocument).filter(TrainingDocument.id == document_id).first()
+
     def save_chunks(self, document_id: str, chunks: list[tuple[str, list[float]]]) -> None:
         for index, (text, embedding) in enumerate(chunks):
             chunk = TrainingChunk(document_id=document_id, chunk_text=text, chunk_index=index, embedding=embedding)
             self.db.add(chunk)
+        doc = self.get_document(document_id)
+        if doc:
+            doc.status = "done"
         self.db.commit()

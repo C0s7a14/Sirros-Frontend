@@ -20,7 +20,7 @@ class PdfService:
 
     def upload(self, training_id: str, filename: str, content: bytes) -> DocumentResponse:
         doc = self.repo.create_document(training_id=training_id, filename=filename)
-        return DocumentResponse(id=doc.id, training_id=doc.training_id, filename=doc.filename)
+        return DocumentResponse.model_validate(doc)
 
     def process(self, document_id: str, content: bytes) -> None:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:

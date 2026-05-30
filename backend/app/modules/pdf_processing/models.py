@@ -14,6 +14,7 @@ class TrainingDocument(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     training_id: Mapped[str] = mapped_column(String, ForeignKey("trainings.id"), nullable=False)
     filename: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="processing", server_default="processing")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 

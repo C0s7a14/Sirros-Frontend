@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { trainingsService } from '../../services/trainings'
@@ -14,7 +14,8 @@ export function TrainingPage() {
   const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
-  const [uploadMsg, setUploadMsg] = useState<string | null>(null)
+  const [processingDocId, setProcessingDocId] = useState<string | null>(null)
+  const [pdfReady, setPdfReady] = useState(false)
   const [question, setQuestion] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [asking, setAsking] = useState(false)
@@ -25,16 +26,33 @@ export function TrainingPage() {
     enabled: !!id,
   })
 
+  useEffect(() => {
+    if (!processingDocId) return
+    const interval = setInterval(async () => {
+      try {
+        const doc = await trainingsService.getDocument(processingDocId)
+        if (doc.status === 'done') {
+          setPdfReady(true)
+          setProcessingDocId(null)
+          clearInterval(interval)
+        }
+      } catch {
+        clearInterval(interval)
+      }
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [processingDocId])
+
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file || !id) return
     setUploading(true)
-    setUploadMsg(null)
+    setPdfReady(false)
     try {
-      await trainingsService.uploadDocument(id, file)
-      setUploadMsg('PDF enviado! Processamento em andamento.')
+      const doc = await trainingsService.uploadDocument(id, file)
+      setProcessingDocId(doc.id)
     } catch {
-      setUploadMsg('Erro ao enviar PDF.')
+      setProcessingDocId(null)
     } finally {
       setUploading(false)
     }
@@ -87,7 +105,20 @@ export function TrainingPage() {
         >
           {uploading ? 'Enviando...' : 'Selecionar PDF'}
         </button>
-        {uploadMsg && <p className="text-sm text-[#333]">{uploadMsg}</p>}
+        {processingDocId && (
+          <div className="flex items-center gap-2 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
+            <svg className="animate-spin h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+            Processando PDF, aguarde...
+          </div>
+        )}
+        {pdfReady && (
+          <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            ✓ PDF processado! Você já pode fazer perguntas.
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-[20px] shadow-[0_4px_15px_rgba(0,0,0,0.08)] overflow-hidden">

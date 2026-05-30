@@ -15,4 +15,6 @@ export const trainingsService = {
   },
   ask: (trainingId: string, question: string) =>
     api.post<AskResponse>(`/trainings/${trainingId}/ask`, { question }).then((r) => r.data),
+  getDocument: (documentId: string) =>
+    api.get<TrainingDocument>(`/documents/${documentId}`).then((r) => r.data),
 }
