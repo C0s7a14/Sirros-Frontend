@@ -39,7 +39,10 @@ def upload_document(
     if not file.filename or not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Arquivo deve ser um PDF")
 
-    content = file.file.read()
-    doc = PdfService(db).upload(training_id=training_id, filename=file.filename, content=content)
-    background_tasks.add_task(process_in_background, doc.id, content)
-    return doc
+    try:
+        content = file.file.read()
+        doc = PdfService(db).upload(training_id=training_id, filename=file.filename, content=content)
+        background_tasks.add_task(process_in_background, doc.id, content)
+        return doc
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
