@@ -13,4 +13,4 @@ httpx
 pgvector
 groq
 pydantic[email]
-sentence-transformers
+requests

@@ -1,4 +1,9 @@
 {
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://sirros-backend.onrender.com"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
