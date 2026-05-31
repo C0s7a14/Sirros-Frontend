@@ -21,6 +21,9 @@ class PdfRepository:
         for index, (text, embedding) in enumerate(chunks):
             chunk = TrainingChunk(document_id=document_id, chunk_text=text, chunk_index=index, embedding=embedding)
             self.db.add(chunk)
+        self.mark_done(document_id)
+
+    def mark_done(self, document_id: str) -> None:
         doc = self.get_document(document_id)
         if doc:
             doc.status = "done"

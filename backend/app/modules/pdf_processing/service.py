@@ -23,11 +23,14 @@ class PdfService:
         return DocumentResponse.model_validate(doc)
 
     def process(self, document_id: str, content: bytes) -> None:
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-            tmp.write(content)
-            tmp_path = tmp.name
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+                tmp.write(content)
+                tmp_path = tmp.name
 
-        text = pymupdf4llm.to_markdown(tmp_path)
-        raw_chunks = _split_chunks(text, CHUNK_SIZE)
-        chunks = [(chunk, embed(chunk)) for chunk in raw_chunks]
-        self.repo.save_chunks(document_id, chunks)
+            text = pymupdf4llm.to_markdown(tmp_path)
+            raw_chunks = _split_chunks(text, CHUNK_SIZE)
+            chunks = [(chunk, embed(chunk)) for chunk in raw_chunks]
+            self.repo.save_chunks(document_id, chunks)
+        except Exception:
+            self.repo.mark_done(document_id)
