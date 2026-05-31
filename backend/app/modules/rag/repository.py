@@ -19,16 +19,20 @@ class RagRepository:
         self.db = db
 
     def search_similar_chunks(
-        self, training_id: str, embedding: list[float], limit: int = 5
+        self, training_id: str, embedding: list[float] | None, limit: int = 5
     ) -> list[TrainingChunk]:
         chunks = (
             self.db.query(TrainingChunk)
             .join(TrainingDocument, TrainingChunk.document_id == TrainingDocument.id)
             .filter(TrainingDocument.training_id == training_id)
-            .filter(TrainingChunk.embedding.isnot(None))
             .all()
         )
-        if not chunks or not embedding:
-            return chunks[:limit]
-        ranked = sorted(chunks, key=lambda c: _cosine_distance(c.embedding, embedding))
+        if not chunks:
+            return []
+        if not embedding:
+            return sorted(chunks, key=lambda c: c.chunk_index)[:limit]
+        scored = [c for c in chunks if c.embedding]
+        if not scored:
+            return sorted(chunks, key=lambda c: c.chunk_index)[:limit]
+        ranked = sorted(scored, key=lambda c: _cosine_distance(c.embedding, embedding))
         return ranked[:limit]
