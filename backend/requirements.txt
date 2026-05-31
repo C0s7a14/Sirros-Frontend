@@ -11,6 +11,6 @@ python-dotenv
 pytest
 httpx
 pgvector
-ollama
+groq
 pydantic[email]
 sentence-transformers

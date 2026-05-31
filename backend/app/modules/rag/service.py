@@ -1,14 +1,13 @@
 import os
 
-import ollama
+from groq import Groq
 from sqlalchemy.orm import Session
 
 from app.embeddings import embed
 from app.modules.rag.repository import RagRepository
 from app.modules.rag.schemas import AskResponse, ChunkSource
 
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 TOP_K = 5
 
 
@@ -39,12 +38,12 @@ class RagService:
             )
 
         prompt = _build_prompt(question, [c.chunk_text for c in chunks])
-        client = ollama.Client(host=OLLAMA_HOST)
-        response = client.chat(
-            model=OLLAMA_MODEL,
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+        response = client.chat.completions.create(
+            model=GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}],
         )
-        answer = response.message.content
+        answer = response.choices[0].message.content
 
         sources = [
             ChunkSource(chunk_id=c.id, chunk_text=c.chunk_text, chunk_index=c.chunk_index)

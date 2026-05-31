@@ -10,7 +10,10 @@ try:
         return _model
 
     def embed(text: str) -> list[float]:
-        return _get_model().encode(text).tolist()
+        result = _get_model().encode(text)
+        if hasattr(result, 'ndim') and result.ndim > 1:
+            result = result[0]
+        return result.tolist()
 
 except ImportError:
     def embed(text: str) -> list[float]:  # type: ignore[misc]
