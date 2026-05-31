@@ -18,3 +18,5 @@ services:
         value: 7
       - key: DATABASE_URL
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: "*"
