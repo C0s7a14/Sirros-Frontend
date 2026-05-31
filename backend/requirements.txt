@@ -13,6 +13,3 @@ httpx
 groq
 pydantic[email]
 requests
-sentence-transformers
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
