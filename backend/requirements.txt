@@ -10,7 +10,6 @@ pymupdf4llm
 python-dotenv
 pytest
 httpx
-pgvector
 groq
 pydantic[email]
 requests

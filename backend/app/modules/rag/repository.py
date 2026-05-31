@@ -21,22 +21,6 @@ class RagRepository:
     def search_similar_chunks(
         self, training_id: str, embedding: list[float], limit: int = 5
     ) -> list[TrainingChunk]:
-        try:
-            return (
-                self.db.query(TrainingChunk)
-                .join(TrainingDocument, TrainingChunk.document_id == TrainingDocument.id)
-                .filter(TrainingDocument.training_id == training_id)
-                .filter(TrainingChunk.embedding.isnot(None))
-                .order_by(TrainingChunk.embedding.cosine_distance(embedding))
-                .limit(limit)
-                .all()
-            )
-        except Exception:
-            return self._fallback_search(training_id, embedding, limit)
-
-    def _fallback_search(
-        self, training_id: str, embedding: list[float], limit: int
-    ) -> list[TrainingChunk]:
         chunks = (
             self.db.query(TrainingChunk)
             .join(TrainingDocument, TrainingChunk.document_id == TrainingDocument.id)
